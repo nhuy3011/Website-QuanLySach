@@ -8,16 +8,12 @@ function e($value)
 $error = $_SESSION['error'] ?? '';
 unset($_SESSION['error']);
 
-// Ensure $categories is defined and initialized
-if (!isset($categories)) {
-    // Example initialization, replace with actual logic
-    $categories = []; // Assuming categories should be an array
-}
+// Ensure $categories is defined
+$categories = $categories ?? [];
 
-// Ensure $book is defined and initialized
+// Ensure $book is defined
 if (!isset($book)) {
-    // Example initialization, replace with actual logic
-    $book = new Book('', '', '', 0, 0, ''); // Replace with actual default values for the 6 arguments
+    die('Error: Book data is not available.');
 }
 ?>
 

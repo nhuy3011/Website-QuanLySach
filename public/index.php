@@ -1,107 +1,116 @@
-
 <?php
 
-// Khởi tạo session để lưu thông báo thành công hoặc lỗi
 session_start();
 
-// Nạp file cấu hình
 require_once '../app/config/config.php';
 
-// Nạp các Controller
+require_once APP_ROOT . '/app/libs/DBConnection.php';
+
+require_once APP_ROOT . '/app/models/Book.php';
+require_once APP_ROOT . '/app/models/Category.php';
+
+require_once APP_ROOT . '/app/services/BookService.php';
+require_once APP_ROOT . '/app/services/CategoryService.php';
+
 require_once APP_ROOT . '/app/controllers/HomeController.php';
 require_once APP_ROOT . '/app/controllers/BookController.php';
+require_once APP_ROOT . '/app/controllers/CategoryController.php';
 
-// Nhận controller từ URL, mặc định là home
+// Lấy controller từ URL
 $controller = $_GET['controller'] ?? 'home';
 
-// Nhận action từ URL, mặc định là index
+// Lấy action từ URL
 $action = $_GET['action'] ?? 'index';
 
-// Nhận mã sách nếu có
+// Lấy mã sách hoặc mã thể loại
 $id = $_GET['id'] ?? null;
 
-// Điều hướng Controller
+// Điều hướng controller
 switch ($controller) {
 
-    // Trang chủ: danh sách và tìm kiếm sách
+    // Trang quản lý sách
     case 'home':
         $homeController = new HomeController();
-
-        if ($action === 'index') {
-            $homeController->index();
-        } else {
-            http_response_code(404);
-            echo "Không tìm thấy chức năng.";
-        }
+        $homeController->index();
         break;
 
-    // Các chức năng quản lý sách
+    // Chức năng sách
     case 'book':
         $bookController = new BookController();
 
         switch ($action) {
-
-            // Hiển thị form thêm sách
             case 'add':
                 $bookController->add();
                 break;
 
-            // Xử lý thêm sách
             case 'store':
                 $bookController->store();
                 break;
 
-            // Hiển thị form sửa sách
             case 'edit':
-                if ($id !== null && ctype_digit((string) $id)) {
-                    $bookController->edit((int) $id);
-                } else {
-                    header('Location: ' . DOMAIN);
-                    exit;
-                }
+                $bookController->edit($id);
                 break;
 
-            // Xử lý cập nhật sách
             case 'update':
-                if ($id !== null && ctype_digit((string) $id)) {
-                    $bookController->update((int) $id);
-                } else {
-                    header('Location: ' . DOMAIN);
-                    exit;
-                }
+                $bookController->update($id);
                 break;
 
-            // Hiển thị trang xác nhận xóa
             case 'delete':
-                if ($id !== null && ctype_digit((string) $id)) {
-                    $bookController->delete((int) $id);
-                } else {
-                    header('Location: ' . DOMAIN);
-                    exit;
-                }
+                $bookController->delete($id);
                 break;
 
-            // Thực hiện xóa sách
             case 'destroy':
-                if ($id !== null && ctype_digit((string) $id)) {
-                    $bookController->destroy((int) $id);
-                } else {
-                    header('Location: ' . DOMAIN);
-                    exit;
-                }
+                $bookController->destroy($id);
                 break;
 
             default:
-                http_response_code(404);
-                echo "Không tìm thấy chức năng quản lý sách.";
+                header('Location: ' . DOMAIN);
+                exit;
+        }
+        break;
+
+    // Chức năng thể loại
+    case 'category':
+        $categoryController = new CategoryController();
+
+        switch ($action) {
+            case 'index':
+                $categoryController->index();
                 break;
+
+            case 'add':
+                $categoryController->add();
+                break;
+
+            case 'store':
+                $categoryController->store();
+                break;
+
+            case 'edit':
+                $categoryController->edit($id);
+                break;
+
+            case 'update':
+                $categoryController->update($id);
+                break;
+
+            case 'delete':
+                $categoryController->delete($id);
+                break;
+
+            case 'destroy':
+                $categoryController->destroy($id);
+                break;
+
+            default:
+                header('Location: ' . DOMAIN . '?controller=category');
+                exit;
         }
         break;
 
     default:
-        http_response_code(404);
-        echo "Không tìm thấy trang yêu cầu.";
-        break;
+        header('Location: ' . DOMAIN);
+        exit;
 }
 
 ?>

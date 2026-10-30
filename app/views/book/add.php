@@ -8,7 +8,7 @@ function e($value)
 $error = $_SESSION['error'] ?? '';
 unset($_SESSION['error']);
 
-// Ensure $categories is defined and passed to the view
+// Ensure $categories is defined and populated
 $categories = $categories ?? [];
 ?>
 

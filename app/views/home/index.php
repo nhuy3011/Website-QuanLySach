@@ -26,7 +26,7 @@ $categories = $categories ?? []; // Ensure $categories is defined as an empty ar
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Quản lý sách thư viện</title>
+    <title>Quản lý kho sách thư viện</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
@@ -61,15 +61,28 @@ $categories = $categories ?? []; // Ensure $categories is defined as an empty ar
 <!-- Thanh điều hướng -->
 <nav class="navbar navbar-dark bg-primary">
     <div class="container-fluid px-4">
-        <a class="navbar-brand" href="<?= e(DOMAIN) ?>">
+
+        <a class="navbar-brand fw-bold" href="<?= e(DOMAIN) ?>">
             <i class="bi bi-book-half me-2"></i>
             QUẢN LÝ SÁCH THƯ VIỆN
         </a>
 
-        <span class="text-white">
-            <i class="bi bi-person-workspace me-1"></i>
-            Hệ thống dành cho thủ thư
-        </span>
+        <div class="d-flex gap-2">
+
+            <a href="<?= e(DOMAIN) ?>"
+               class="btn btn-light text-primary">
+                <i class="bi bi-book me-1"></i>
+                Quản lý sách
+            </a>
+
+            <a href="<?= e(DOMAIN) ?>?controller=category"
+               class="btn btn-outline-light">
+                <i class="bi bi-tags me-1"></i>
+                Quản lý thể loại
+            </a>
+
+        </div>
+
     </div>
 </nav>
 
@@ -80,7 +93,7 @@ $categories = $categories ?? []; // Ensure $categories is defined as an empty ar
         <div>
             <h3 class="fw-bold mb-1">Quản lý kho sách</h3>
             <p class="text-secondary mb-0">
-                Theo dõi và quản lý thông tin sách trong thư viện.
+                Theo dõi và quản lý thông tin số lượng sách trong thư viện.
             </p>
         </div>
 

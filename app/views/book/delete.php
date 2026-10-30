@@ -5,7 +5,7 @@ function e($value)
     return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
-// Ensure $book is defined or passed to the view
+// Ensure $book is defined before using it
 if (!isset($book)) {
     die('Error: Book data is not available.');
 }
