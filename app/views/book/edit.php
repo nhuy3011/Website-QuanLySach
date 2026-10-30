@@ -8,13 +8,17 @@ function e($value)
 $error = $_SESSION['error'] ?? '';
 unset($_SESSION['error']);
 
-// Ensure $book is defined or passed to the view
-if (!isset($book)) {
-    throw new Exception('The variable $book is not defined.');
+// Ensure $categories is defined and initialized
+if (!isset($categories)) {
+    // Example initialization, replace with actual logic
+    $categories = []; // Assuming categories should be an array
 }
 
-// Ensure $categories is defined or passed to the view
-$categories = $categories ?? [];
+// Ensure $book is defined and initialized
+if (!isset($book)) {
+    // Example initialization, replace with actual logic
+    $book = new Book('', '', '', 0, 0, ''); // Replace with actual default values for the 6 arguments
+}
 ?>
 
 <!DOCTYPE html>
@@ -22,23 +26,17 @@ $categories = $categories ?? [];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Sửa thông tin sách</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
           rel="stylesheet">
-
-    <style>
-        body { background: #f4f6f9; }
-        .form-card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,.06);
-        }
-    </style>
 </head>
-<body>
+
+<body class="bg-light">
 
 <nav class="navbar navbar-dark bg-primary">
     <div class="container">
@@ -50,15 +48,15 @@ $categories = $categories ?? [];
 
 <div class="container py-4">
 
-    <div class="mb-4">
-        <a href="<?= e(DOMAIN) ?>" class="text-decoration-none">
-            <i class="bi bi-arrow-left"></i> Quay lại danh sách
-        </a>
-        <h3 class="fw-bold mt-3">Sửa thông tin sách</h3>
-        <p class="text-secondary">
-            Đang chỉnh sửa sách mã <?= (int) $book->getId() ?>.
-        </p>
-    </div>
+    <a href="<?= e(DOMAIN) ?>" class="text-decoration-none">
+        <i class="bi bi-arrow-left"></i> Quay lại danh sách
+    </a>
+
+    <h3 class="fw-bold mt-3">Sửa thông tin sách</h3>
+
+    <p class="text-secondary">
+        Đang chỉnh sửa sách mã <?= (int) $book->getId() ?>.
+    </p>
 
     <?php if ($error !== ''): ?>
         <div class="alert alert-danger">
@@ -66,7 +64,7 @@ $categories = $categories ?? [];
         </div>
     <?php endif; ?>
 
-    <div class="card form-card">
+    <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
 
             <form method="POST"
@@ -75,62 +73,38 @@ $categories = $categories ?? [];
                 <div class="row g-3">
 
                     <div class="col-md-6">
-                        <label for="title" class="form-label">
+                        <label class="form-label">
                             Tên sách <span class="text-danger">*</span>
                         </label>
-                        <input type="text" class="form-control"
-                               id="title" name="title"
-                               maxlength="255"
-                               value="<?= e($book->getTitle()) ?>" required>
+
+                        <input type="text" name="title"
+                               class="form-control"
+                               maxlength="200"
+                               value="<?= e($book->getTitle()) ?>"
+                               required>
                     </div>
 
                     <div class="col-md-6">
-                        <label for="author" class="form-label">
+                        <label class="form-label">
                             Tác giả <span class="text-danger">*</span>
                         </label>
-                        <input type="text" class="form-control"
-                               id="author" name="author"
+
+                        <input type="text" name="author"
+                               class="form-control"
                                maxlength="150"
-                               value="<?= e($book->getAuthor()) ?>" required>
+                               value="<?= e($book->getAuthor()) ?>"
+                               required>
                     </div>
 
                     <div class="col-md-6">
-                        <label for="isbn" class="form-label">Mã ISBN</label>
-                        <input type="text" class="form-control"
-                               id="isbn" name="isbn" maxlength="30"
-                               value="<?= e($book->getIsbn()) ?>">
-                    </div>
+                        <label class="form-label">Thể loại</label>
 
-                    <div class="col-md-6">
-                        <label for="publisher" class="form-label">
-                            Nhà xuất bản
-                        </label>
-                        <input type="text" class="form-control"
-                               id="publisher" name="publisher"
-                               maxlength="150"
-                               value="<?= e($book->getPublisher()) ?>">
-                    </div>
+                        <select name="category_id" class="form-select">
 
-                    <div class="col-md-6">
-                        <label for="publish_year" class="form-label">
-                            Năm xuất bản
-                        </label>
-                        <input type="number" class="form-control"
-                               id="publish_year" name="publish_year"
-                               min="1901" max="2155"
-                               value="<?= e($book->getPublishYear()) ?>">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="category_id" class="form-label">
-                            Thể loại <span class="text-danger">*</span>
-                        </label>
-
-                        <select class="form-select"
-                                id="category_id" name="category_id" required>
-                            <option value="">-- Chọn thể loại --</option>
+                            <option value="">-- Chưa phân loại --</option>
 
                             <?php foreach ($categories as $category): ?>
+
                                 <option
                                     value="<?= (int) $category->getId() ?>"
                                     <?= (string) $book->getCategoryId() ===
@@ -138,41 +112,67 @@ $categories = $categories ?? [];
                                         ? 'selected' : '' ?>>
 
                                     <?= e($category->getName()) ?>
+
                                 </option>
+
                             <?php endforeach; ?>
+
                         </select>
                     </div>
 
                     <div class="col-md-6">
-                        <label for="quantity" class="form-label">
+                        <label class="form-label">Giá sách (VNĐ)</label>
+
+                        <input type="number" name="price"
+                               class="form-control"
+                               min="0" max="999999999999"
+                               step="1"
+                               value="<?= e($book->getPrice()) ?>">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
                             Số lượng trong kho
-                            <span class="text-danger">*</span>
                         </label>
-                        <input type="number" class="form-control"
-                               id="quantity" name="quantity"
+
+                        <input type="number" name="quantity"
+                               class="form-control"
                                min="0" step="1"
                                value="<?= (int) $book->getQuantity() ?>"
                                required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Mô tả sách</label>
+
+                        <textarea name="description"
+                                  class="form-control"
+                                  rows="4"><?= e($book->getDescription()) ?></textarea>
                     </div>
 
                 </div>
 
                 <hr class="my-4">
 
-                <div class="d-flex gap-2 justify-content-end">
+                <div class="d-flex justify-content-end gap-2">
+
                     <a href="<?= e(DOMAIN) ?>"
                        class="btn btn-outline-secondary">
                         Hủy
                     </a>
 
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-1"></i> Cập nhật
+                        <i class="bi bi-save me-1"></i>
+                        Cập nhật
                     </button>
+
                 </div>
 
             </form>
+
         </div>
     </div>
+
 </div>
 
 </body>

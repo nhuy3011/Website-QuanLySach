@@ -1,12 +1,11 @@
 
 <?php
-// Hàm chuyển dữ liệu thành HTML an toàn khi hiển thị
 function e($value)
 {
     return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
-// Lấy thông báo từ session rồi xóa để không hiện lại khi tải trang
+// Lấy thông báo
 $success = $_SESSION['success'] ?? '';
 $error = $_SESSION['error'] ?? '';
 
@@ -14,15 +13,11 @@ unset($_SESSION['success'], $_SESSION['error']);
 
 $keyword = $_GET['keyword'] ?? '';
 $categoryId = $_GET['category_id'] ?? '';
-
-// Fetch categories from the database or define a default value
-$categories = $categories ?? [];
-
-// Define $totalBooks with a default value or fetch it from the database
-$totalBooks = $totalBooks ?? 0;
-$totalQuantity = $totalQuantity ?? 0; // Define $totalQuantity with a default value
-$outOfStock = $outOfStock ?? 0; // Define $outOfStock with a default value
-$books = $books ?? []; // Define $books with a default value
+$books = $books ?? []; // Ensure $books is defined as an empty array if not set
+$totalQuantity = $totalQuantity ?? 0; // Ensure $totalQuantity is defined as 0 if not set
+$totalBooks = $totalBooks ?? 0; // Ensure $totalBooks is defined as 0 if not set
+$outOfStock = $outOfStock ?? 0; // Ensure $outOfStock is defined as 0 if not set
+$categories = $categories ?? []; // Ensure $categories is defined as an empty array if not set
 ?>
 
 <!DOCTYPE html>
@@ -33,9 +28,9 @@ $books = $books ?? []; // Define $books with a default value
 
     <title>Quản lý sách thư viện</title>
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
           rel="stylesheet">
 
@@ -48,25 +43,15 @@ $books = $books ?? []; // Define $books with a default value
             font-weight: 700;
         }
 
-        .stat-card {
+        .stat-card, .main-card {
             border: none;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .main-card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,.05);
         }
 
         .table th {
             white-space: nowrap;
             background-color: #f0f3f7;
-        }
-
-        .book-title {
-            font-weight: 600;
         }
     </style>
 </head>
@@ -95,7 +80,7 @@ $books = $books ?? []; // Define $books with a default value
         <div>
             <h3 class="fw-bold mb-1">Quản lý kho sách</h3>
             <p class="text-secondary mb-0">
-                Theo dõi, tìm kiếm và cập nhật thông tin sách trong thư viện.
+                Theo dõi và quản lý thông tin sách trong thư viện.
             </p>
         </div>
 
@@ -164,37 +149,29 @@ $books = $books ?? []; // Define $books with a default value
 
     </div>
 
-    <!-- Khu vực tìm kiếm và lọc -->
+    <!-- Tìm kiếm và lọc -->
     <div class="card main-card mb-4">
         <div class="card-body">
+
             <form method="GET" action="<?= e(DOMAIN) ?>"
                   class="row g-3 align-items-end">
 
                 <input type="hidden" name="controller" value="home">
-                <input type="hidden" name="action" value="index">
 
                 <div class="col-md-6">
-                    <label for="keyword" class="form-label">
-                        Tìm kiếm sách
-                    </label>
+                    <label class="form-label">Tìm kiếm sách</label>
 
                     <input type="text"
-                           class="form-control"
-                           id="keyword"
                            name="keyword"
-                           placeholder="Nhập tên sách, tác giả hoặc ISBN..."
+                           class="form-control"
+                           placeholder="Nhập tên sách hoặc tác giả..."
                            value="<?= e($keyword) ?>">
                 </div>
 
                 <div class="col-md-4">
-                    <label for="category_id" class="form-label">
-                        Phân loại thể loại
-                    </label>
+                    <label class="form-label">Thể loại</label>
 
-                    <select class="form-select"
-                            id="category_id"
-                            name="category_id">
-
+                    <select name="category_id" class="form-select">
                         <option value="">Tất cả thể loại</option>
 
                         <?php foreach ($categories as $category): ?>
@@ -205,6 +182,7 @@ $books = $books ?? []; // Define $books with a default value
                                     ? 'selected' : '' ?>>
 
                                 <?= e($category->getName()) ?>
+
                             </option>
                         <?php endforeach; ?>
 
@@ -226,8 +204,9 @@ $books = $books ?? []; // Define $books with a default value
         </div>
     </div>
 
-    <!-- Danh sách sách -->
+    <!-- Bảng danh sách sách -->
     <div class="card main-card">
+
         <div class="card-header bg-white py-3">
             <h5 class="mb-0 fw-bold">
                 <i class="bi bi-list-ul me-2"></i>
@@ -237,17 +216,17 @@ $books = $books ?? []; // Define $books with a default value
 
         <div class="card-body p-0">
             <div class="table-responsive">
+
                 <table class="table table-hover align-middle mb-0">
 
                     <thead>
                         <tr>
-                            <th class="ps-3">Mã</th>
+                            <th class="ps-3">Mã sách</th>
                             <th>Tên sách</th>
                             <th>Tác giả</th>
                             <th>Thể loại</th>
-                            <th>Nhà xuất bản</th>
-                            <th>Năm XB</th>
-                            <th class="text-center">Số lượng</th>
+                            <th>Giá sách</th>
+                            <th>Số lượng</th>
                             <th>Trạng thái</th>
                             <th class="text-center">Thao tác</th>
                         </tr>
@@ -258,7 +237,7 @@ $books = $books ?? []; // Define $books with a default value
                         <?php if (empty($books)): ?>
 
                             <tr>
-                                <td colspan="9"
+                                <td colspan="8"
                                     class="text-center py-5 text-secondary">
                                     <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                     Không tìm thấy sách phù hợp.
@@ -275,13 +254,13 @@ $books = $books ?? []; // Define $books with a default value
                                     </td>
 
                                     <td>
-                                        <span class="book-title">
+                                        <strong>
                                             <?= e($book['title']) ?>
-                                        </span>
+                                        </strong>
 
-                                        <?php if (!empty($book['isbn'])): ?>
+                                        <?php if (!empty($book['description'])): ?>
                                             <div class="small text-secondary">
-                                                ISBN: <?= e($book['isbn']) ?>
+                                                <?= e($book['description']) ?>
                                             </div>
                                         <?php endif; ?>
                                     </td>
@@ -289,17 +268,19 @@ $books = $books ?? []; // Define $books with a default value
                                     <td><?= e($book['author']) ?></td>
 
                                     <td>
-                                        <span class="badge text-bg-info">
-                                            <?= e($book['category_name']) ?>
-                                        </span>
+                                        <?php if ($book['category_name']): ?>
+                                            <span class="badge text-bg-info">
+                                                <?= e($book['category_name']) ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="text-secondary">
+                                                Chưa phân loại
+                                            </span>
+                                        <?php endif; ?>
                                     </td>
 
                                     <td>
-                                        <?= e($book['publisher'] ?: '—') ?>
-                                    </td>
-
-                                    <td>
-                                        <?= e($book['publish_year'] ?: '—') ?>
+                                        <?= number_format((float) $book['price'], 0, ',', '.') ?> đ
                                     </td>
 
                                     <td class="text-center fw-bold">
@@ -319,17 +300,17 @@ $books = $books ?? []; // Define $books with a default value
                                     </td>
 
                                     <td class="text-center text-nowrap">
+
                                         <a href="<?= e(DOMAIN) ?>?controller=book&action=edit&id=<?= (int) $book['id'] ?>"
-                                           class="btn btn-sm btn-outline-primary"
-                                           title="Sửa sách">
+                                           class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
 
                                         <a href="<?= e(DOMAIN) ?>?controller=book&action=delete&id=<?= (int) $book['id'] ?>"
-                                           class="btn btn-sm btn-outline-danger"
-                                           title="Xóa sách">
+                                           class="btn btn-sm btn-outline-danger">
                                             <i class="bi bi-trash"></i>
                                         </a>
+
                                     </td>
                                 </tr>
 
@@ -345,8 +326,9 @@ $books = $books ?? []; // Define $books with a default value
 
         <div class="card-footer bg-white text-secondary small">
             Hiển thị <?= count($books) ?> kết quả.
-            Số liệu thống kê phía trên tính trên toàn bộ kho sách.
+            Thống kê tính trên toàn bộ kho sách.
         </div>
+
     </div>
 
 </div>

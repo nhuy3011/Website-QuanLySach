@@ -1,55 +1,61 @@
-
 <?php
 
 class Category
 {
-    // Các thuộc tính tương ứng với cột trong bảng categorys
     private $id;
     private $name;
     private $description;
+    private $created_at;
 
-    // Khởi tạo đối tượng thể loại
-    public function __construct($id, $name, $description = null)
+    // Hàm khởi tạo đối tượng thể loại
+    public function __construct($id, $name, $description = null, $created_at = null)
     {
         $this->id = $id;
         $this->name = $name;
         $this->description = $description;
+        $this->created_at = $created_at;
     }
 
-    // Lấy mã thể loại
+    // Getter
     public function getId()
     {
         return $this->id;
     }
 
-    // Lấy tên thể loại
     public function getName()
     {
         return $this->name;
     }
 
-    // Lấy mô tả thể loại
     public function getDescription()
     {
         return $this->description;
     }
 
-    // Thay đổi mã thể loại
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    // Setter
     public function setId($id)
     {
         $this->id = $id;
     }
 
-    // Thay đổi tên thể loại
     public function setName($name)
     {
         $this->name = $name;
     }
 
-    // Thay đổi mô tả thể loại
     public function setDescription($description)
     {
         $this->description = $description;
+    }
+
+    public function setCreatedAt($created_at)
+    {
+        $this->created_at = $created_at;
     }
 }
 

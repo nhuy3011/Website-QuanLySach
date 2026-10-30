@@ -1,4 +1,3 @@
-
 <?php
 
 require_once APP_ROOT . '/app/libs/DBConnection.php';
@@ -10,33 +9,31 @@ class BookService
 
     public function __construct()
     {
-        // Khởi tạo kết nối database
+        // Kết nối database
         $db = new DBConnection();
         $this->conn = $db->getConnection();
     }
 
-    // Lấy danh sách sách, hỗ trợ tìm kiếm và lọc thể loại
+    // Lấy danh sách sách, tìm kiếm và lọc thể loại
     public function getAllBooks($keyword = '', $categoryId = '')
     {
-        $sql = "SELECT books.*, categorys.name AS category_name
+        $sql = "SELECT books.*, categories.name AS category_name
                 FROM books
-                INNER JOIN categorys
-                    ON books.category_id = categorys.id
+                LEFT JOIN categories
+                ON books.category_id = categories.id
                 WHERE 1 = 1";
 
         $params = [];
 
-        // Tìm theo tên sách, tác giả hoặc mã ISBN
+        // Tìm kiếm theo tên sách hoặc tác giả
         if ($keyword !== '') {
             $sql .= " AND (
-                books.title LIKE :title
-                OR books.author LIKE :author
-                OR books.isbn LIKE :isbn
-            )";
+                        books.title LIKE :title
+                        OR books.author LIKE :author
+                    )";
 
             $params['title'] = '%' . $keyword . '%';
             $params['author'] = '%' . $keyword . '%';
-            $params['isbn'] = '%' . $keyword . '%';
         }
 
         // Lọc theo thể loại
@@ -45,7 +42,6 @@ class BookService
             $params['category_id'] = $categoryId;
         }
 
-        // Sắp xếp sách theo mã giảm dần
         $sql .= " ORDER BY books.id DESC";
 
         $stmt = $this->conn->prepare($sql);
@@ -54,7 +50,7 @@ class BookService
         return $stmt->fetchAll();
     }
 
-    // Lấy một quyển sách theo mã
+    // Lấy sách theo mã
     public function getBookById($id)
     {
         $sql = "SELECT * FROM books WHERE id = :id";
@@ -72,48 +68,43 @@ class BookService
             $row['id'],
             $row['title'],
             $row['author'],
-            $row['isbn'],
-            $row['publisher'],
-            $row['publish_year'],
             $row['category_id'],
-            $row['quantity']
+            $row['price'],
+            $row['quantity'],
+            $row['description']
         );
     }
 
-    // Thêm sách mới
+    // Thêm sách
     public function addBook(Book $book)
     {
         $sql = "INSERT INTO books
-                (title, author, isbn, publisher, publish_year,
-                 category_id, quantity)
+                (title, author, category_id, price, quantity, description)
                 VALUES
-                (:title, :author, :isbn, :publisher, :publish_year,
-                 :category_id, :quantity)";
+                (:title, :author, :category_id, :price, :quantity, :description)";
 
         $stmt = $this->conn->prepare($sql);
 
         return $stmt->execute([
             'title' => $book->getTitle(),
             'author' => $book->getAuthor(),
-            'isbn' => $book->getIsbn() ?: null,
-            'publisher' => $book->getPublisher() ?: null,
-            'publish_year' => $book->getPublishYear() ?: null,
             'category_id' => $book->getCategoryId(),
-            'quantity' => $book->getQuantity()
+            'price' => $book->getPrice(),
+            'quantity' => $book->getQuantity(),
+            'description' => $book->getDescription()
         ]);
     }
 
-    // Cập nhật thông tin sách
+    // Cập nhật sách
     public function updateBook(Book $book)
     {
         $sql = "UPDATE books SET
                     title = :title,
                     author = :author,
-                    isbn = :isbn,
-                    publisher = :publisher,
-                    publish_year = :publish_year,
                     category_id = :category_id,
-                    quantity = :quantity
+                    price = :price,
+                    quantity = :quantity,
+                    description = :description
                 WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
@@ -121,21 +112,21 @@ class BookService
         return $stmt->execute([
             'title' => $book->getTitle(),
             'author' => $book->getAuthor(),
-            'isbn' => $book->getIsbn() ?: null,
-            'publisher' => $book->getPublisher() ?: null,
-            'publish_year' => $book->getPublishYear() ?: null,
             'category_id' => $book->getCategoryId(),
+            'price' => $book->getPrice(),
             'quantity' => $book->getQuantity(),
+            'description' => $book->getDescription(),
             'id' => $book->getId()
         ]);
     }
 
-    // Xóa sách theo mã
+    // Xóa sách
     public function deleteBook($id)
     {
         $sql = "DELETE FROM books WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
+
         return $stmt->execute(['id' => $id]);
     }
 
@@ -147,7 +138,7 @@ class BookService
         return (int) $this->conn->query($sql)->fetchColumn();
     }
 
-    // Tính tổng số quyển sách hiện có trong kho
+    // Tính tổng số quyển sách trong kho
     public function countTotalQuantity()
     {
         $sql = "SELECT COALESCE(SUM(quantity), 0) FROM books";

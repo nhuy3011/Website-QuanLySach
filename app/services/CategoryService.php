@@ -1,4 +1,3 @@
-
 <?php
 
 require_once APP_ROOT . '/app/libs/DBConnection.php';
@@ -10,15 +9,15 @@ class CategoryService
 
     public function __construct()
     {
-        // Tạo kết nối database
+        // Khởi tạo kết nối database
         $db = new DBConnection();
         $this->conn = $db->getConnection();
     }
 
-    // Lấy tất cả thể loại sách
+    // Lấy tất cả thể loại
     public function getAllCategories()
     {
-        $sql = "SELECT * FROM categorys ORDER BY name ASC";
+        $sql = "SELECT * FROM categories ORDER BY name ASC";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
@@ -26,11 +25,11 @@ class CategoryService
         $categories = [];
 
         while ($row = $stmt->fetch()) {
-            // Chuyển từng dòng dữ liệu thành đối tượng Category
             $category = new Category(
                 $row['id'],
                 $row['name'],
-                $row['description']
+                $row['description'],
+                $row['created_at']
             );
 
             $categories[] = $category;
@@ -39,10 +38,10 @@ class CategoryService
         return $categories;
     }
 
-    // Lấy một thể loại theo mã
+    // Lấy thể loại theo mã
     public function getCategoryById($id)
     {
-        $sql = "SELECT * FROM categorys WHERE id = :id";
+        $sql = "SELECT * FROM categories WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute(['id' => $id]);
@@ -56,7 +55,8 @@ class CategoryService
         return new Category(
             $row['id'],
             $row['name'],
-            $row['description']
+            $row['description'],
+            $row['created_at']
         );
     }
 }
