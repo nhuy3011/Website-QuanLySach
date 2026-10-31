@@ -1,109 +1,169 @@
 
 <?php
-function e($value)
-{
-    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 
-// Ensure $category and $bookCount are defined before rendering the view
-$category = $category ?? null;
+// Tiêu đề trang
+$pageTitle = 'Xóa thể loại';
+
+// Đánh dấu menu đang được chọn
+$activeMenu = 'category';
+
+// Kiểm tra và khởi tạo biến $bookCount
 $bookCount = $bookCount ?? 0;
+
+// Nạp giao diện đầu trang
+include APP_ROOT . '/app/views/layouts/header.php';
 
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
+<!-- Tiêu đề trang -->
+<div class="mb-4">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Xóa thể loại</title>
+    <h2 class="fw-bold mb-2">Xóa thể loại sách</h2>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-</head>
+    <p class="text-secondary mb-0">
+        Kiểm tra thông tin trước khi thực hiện xóa thể loại.
+    </p>
 
-<body class="bg-light">
+</div>
 
-<div class="container py-5">
 
-    <div class="card border-0 shadow-sm mx-auto"
-         style="max-width: 600px;">
+<!-- Thông báo xác nhận xóa -->
+<div class="card border-0 shadow-sm">
 
-        <div class="card-body p-4">
+    <div class="card-body p-4">
 
-            <h3 class="fw-bold text-danger mb-3">
-                <i class="bi bi-exclamation-triangle"></i>
-                Xác nhận xóa thể loại
-            </h3>
+        <div class="text-center mb-4">
 
-            <p>Bạn có chắc chắn muốn xóa thể loại này không?</p>
+            <i class="bi bi-exclamation-triangle text-danger"
+               style="font-size: 55px;">
+            </i>
 
-            <div class="bg-light rounded p-3 mb-3">
+            <h5 class="fw-bold mt-3">
+                Bạn có chắc chắn muốn xóa thể loại này?
+            </h5>
 
-            <p>
-                <strong>Mã thể loại:</strong>
-                <?= $category ? (int)$category->getId() : 'N/A' ?>
-                </p>
+            <p class="text-secondary">
+                Thao tác này sẽ không thể hoàn tác.
+            </p>
 
-                <p>
-                    <strong>Tên thể loại:</strong>
-                    <?= $category ? e($category->getName()) : 'N/A' ?>
-                </p>
+        </div>
 
-                <p class="mb-0">
-                    <strong>Số sách thuộc thể loại:</strong>
-                    <?= (int)$bookCount ?>
-                </p>
+
+        <!-- Thông tin thể loại -->
+        <div class="table-responsive">
+
+            <table class="table table-bordered">
+
+                <tr>
+                    <th width="180">Mã thể loại</th>
+
+                    <td>
+                        <?= e($category->getId()) ?>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Tên thể loại</th>
+
+                    <td class="fw-semibold">
+                        <?= e($category->getName()) ?>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Mô tả</th>
+
+                    <td>
+                        <?= e($category->getDescription() ?? '') ?>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Số sách thuộc thể loại</th>
+
+                    <td>
+                        <span class="badge bg-info text-dark">
+                            <?= (int)$bookCount ?> sách
+                        </span>
+                    </td>
+                </tr>
+
+            </table>
+
+        </div>
+
+
+        <!-- Kiểm tra thể loại còn sách hay không -->
+        <?php if ($bookCount > 0): ?>
+
+            <div class="alert alert-warning">
+
+                <i class="bi bi-exclamation-circle me-2"></i>
+
+                Không thể xóa thể loại này vì vẫn còn
+                <?= (int)$bookCount ?> sách thuộc thể loại.
+
+                Bạn cần xử lý các sách thuộc thể loại trước.
 
             </div>
 
-            <?php if ($bookCount > 0): ?>
+            <div class="text-end">
 
-                <div class="alert alert-warning">
-                    Không thể xóa thể loại này vì vẫn còn
-                    <?= (int)$bookCount ?> sách đang thuộc thể loại.
+                <a href="<?= DOMAIN ?>?controller=category"
+                   class="btn btn-secondary">
 
-                    Hãy chuyển các sách sang thể loại khác trước.
-                </div>
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Quay lại
 
-                <div class="text-end">
-                    <a href="<?= e(DOMAIN) ?>?controller=category"
-                       class="btn btn-secondary">
-                        Quay lại
-                    </a>
-                </div>
+                </a>
 
-            <?php else: ?>
+            </div>
+
+        <?php else: ?>
+
+            <!-- Form xác nhận xóa -->
+            <form action="<?= DOMAIN ?>?controller=category&action=destroy&id=<?= e($category->getId()) ?>"
+                  method="POST">
 
                 <div class="alert alert-danger">
-                    Sau khi xóa, thể loại sẽ không còn trong hệ thống.
+
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+
+                    Thể loại này hiện không có sách. Bạn có thể thực hiện xóa.
+
                 </div>
 
-                <form method="POST"
-                      action="<?= e(DOMAIN) ?>?controller=category&action=destroy&id=<?= (int)$category->getId() ?>">
+                <div class="d-flex justify-content-end gap-2">
 
-                    <div class="d-flex justify-content-end gap-2">
+                    <a href="<?= DOMAIN ?>?controller=category"
+                       class="btn btn-outline-secondary">
 
-                        <a href="<?= e(DOMAIN) ?>?controller=category"
-                           class="btn btn-secondary">
-                            Hủy
-                        </a>
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Hủy
 
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash"></i>
-                            Xác nhận xóa
-                        </button>
+                    </a>
 
-                    </div>
+                    <button type="submit" class="btn btn-danger">
 
-                </form>
+                        <i class="bi bi-trash me-1"></i>
+                        Xác nhận xóa
 
-            <?php endif; ?>
+                    </button>
 
-        </div>
+                </div>
+
+            </form>
+
+        <?php endif; ?>
+
     </div>
 
 </div>
 
-</body>
-</html>
+
+<?php
+
+// Nạp giao diện cuối trang
+include APP_ROOT . '/app/views/layouts/footer.php';
+
+?>

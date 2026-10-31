@@ -1,110 +1,148 @@
 
 <?php
-function e($value)
-{
-    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
+
+// Ensure $category is initialized
+if (!isset($category)) {
+    // Example initialization, replace with actual logic
+    $category = new Category('defaultName', 'defaultDescription'); // Replace with actual default values
 }
 
-$error = $_SESSION['error'] ?? '';
-unset($_SESSION['error']);
+// Tiêu đề trang
+$pageTitle = 'Sửa thể loại';
 
-// Ensure $category is defined
-$category = $category ?? (object)[
-    'getId' => fn() => 0,
-    'getName' => fn() => '',
-    'getDescription' => fn() => ''
-];
+// Đánh dấu menu đang được chọn
+$activeMenu = 'category';
+
+// Nạp giao diện đầu trang
+include APP_ROOT . '/app/views/layouts/header.php';
+
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
+<!-- Tiêu đề trang -->
+<div class="mb-4">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Sửa thể loại</title>
+    <h2 class="fw-bold mb-2">Sửa thể loại sách</h2>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-</head>
+    <p class="text-secondary mb-0">
+        Cập nhật thông tin thể loại sách trong hệ thống.
+    </p>
 
-<body class="bg-light">
+</div>
 
-<nav class="navbar navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="<?= e(DOMAIN) ?>">
-            QUẢN LÝ SÁCH THƯ VIỆN
-        </a>
-    </div>
-</nav>
 
-<div class="container py-4">
+<!-- Form sửa thể loại -->
+<div class="card border-0 shadow-sm">
 
-    <a href="<?= e(DOMAIN) ?>?controller=category"
-       class="text-decoration-none">
-        <i class="bi bi-arrow-left"></i> Quay lại danh sách
-    </a>
+    <div class="card-body p-4">
 
-    <h3 class="fw-bold mt-3">Sửa thể loại</h3>
+        <h5 class="fw-bold mb-4">
+            <i class="bi bi-pencil-square text-primary me-2"></i>
+            Thông tin thể loại
+        </h5>
 
-    <?php if ($error !== ''): ?>
-        <div class="alert alert-danger">
-            <?= e($error) ?>
-        </div>
-    <?php endif; ?>
 
-    <div class="card border-0 shadow-sm mt-3">
+        <!-- Hiển thị thông báo lỗi -->
+        <?php if (isset($_SESSION['error'])): ?>
 
-        <div class="card-body p-4">
+            <div class="alert alert-danger alert-dismissible fade show">
 
-            <form method="POST"
-                  action="<?= e(DOMAIN) ?>?controller=category&action=update&id=<?= (int)$category->getId() ?>">
+                <?= e($_SESSION['error']) ?>
 
-                <div class="mb-3">
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
 
-                    <label class="form-label">
-                        Tên thể loại <span class="text-danger">*</span>
-                    </label>
+            </div>
 
-                    <input type="text"
-                           name="name"
-                           class="form-control"
-                           maxlength="100"
-                           value="<?= e($category->getName()) ?>"
-                           required>
+            <?php unset($_SESSION['error']); ?>
 
-                </div>
+        <?php endif; ?>
 
-                <div class="mb-3">
 
-                    <label class="form-label">Mô tả</label>
+        <!-- Form cập nhật thể loại -->
+        <form action="<?= DOMAIN ?>?controller=category&action=update&id=<?= e($category->getId()) ?>"
+              method="POST">
 
-                    <textarea name="description"
-                              class="form-control"
-                              rows="4"
-                              maxlength="255"><?= e($category->getDescription()) ?></textarea>
+            <!-- Mã thể loại -->
+            <div class="mb-3">
 
-                </div>
+                <label class="form-label fw-semibold">
+                    Mã thể loại
+                </label>
 
-                <div class="d-flex justify-content-end gap-2">
+                <input type="text"
+                       class="form-control"
+                       value="<?= e($category->getId()) ?>"
+                       disabled>
 
-                    <a href="<?= e(DOMAIN) ?>?controller=category"
-                       class="btn btn-secondary">
-                        Hủy
-                    </a>
+            </div>
 
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-1"></i>
-                        Cập nhật
-                    </button>
 
-                </div>
+            <!-- Tên thể loại -->
+            <div class="mb-3">
 
-            </form>
+                <label for="name" class="form-label fw-semibold">
+                    Tên thể loại <span class="text-danger">*</span>
+                </label>
 
-        </div>
+                <input type="text"
+                       class="form-control"
+                       id="name"
+                       name="name"
+                       value="<?= e($category->getName()) ?>"
+                       maxlength="100"
+                       required>
+
+            </div>
+
+
+            <!-- Mô tả -->
+            <div class="mb-4">
+
+                <label for="description" class="form-label fw-semibold">
+                    Mô tả
+                </label>
+
+                <textarea class="form-control"
+                          id="description"
+                          name="description"
+                          rows="4"
+                          maxlength="255"><?= e($category->getDescription() ?? '') ?></textarea>
+
+            </div>
+
+
+            <!-- Nút thao tác -->
+            <div class="d-flex gap-2">
+
+                <button type="submit" class="btn btn-primary">
+
+                    <i class="bi bi-save me-1"></i>
+                    Lưu thay đổi
+
+                </button>
+
+                <a href="<?= DOMAIN ?>?controller=category"
+                   class="btn btn-outline-secondary">
+
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Quay lại
+
+                </a>
+
+            </div>
+
+        </form>
+
     </div>
 
 </div>
 
-</body>
-</html>
+
+<?php
+
+// Nạp giao diện cuối trang
+include APP_ROOT . '/app/views/layouts/footer.php';
+
+?>

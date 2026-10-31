@@ -1,209 +1,195 @@
 
 <?php
 
-function e($value)
-{
-    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
+// Tiêu đề trang
+$pageTitle = 'Quản lý thể loại';
 
-$success = $_SESSION['success'] ?? '';
-$error = $_SESSION['error'] ?? '';
+// Đánh dấu menu đang được chọn
+$activeMenu = 'category';
 
-// Initialize $categories as an empty array if not already defined
-$categories = $categories ?? [];
-
-unset($_SESSION['success'], $_SESSION['error']);
+// Nạp giao diện đầu trang
+include APP_ROOT . '/app/views/layouts/header.php';
 
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
+<!-- Tiêu đề và nút thêm thể loại -->
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <div>
+        <h2 class="fw-bold mb-2">Quản lý thể loại</h2>
 
-    <title>Quản lý thể loại</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-          rel="stylesheet">
-</head>
-
-<body class="bg-light">
-
-<!-- Thanh điều hướng -->
-<nav class="navbar navbar-dark bg-primary">
-    <div class="container-fluid px-4">
-
-        <a class="navbar-brand fw-bold" href="<?= e(DOMAIN) ?>">
-            <i class="bi bi-book-half me-2"></i>
-            QUẢN LÝ SÁCH THƯ VIỆN
-        </a>
-
-        <div class="d-flex gap-2">
-
-            <a href="<?= e(DOMAIN) ?>"
-               class="btn btn-outline-light">
-                <i class="bi bi-book me-1"></i>
-                Quản lý sách
-            </a>
-
-            <a href="<?= e(DOMAIN) ?>?controller=category"
-               class="btn btn-light text-primary">
-                <i class="bi bi-tags me-1"></i>
-                Quản lý thể loại
-            </a>
-
-        </div>
-
+        <p class="text-secondary mb-0">
+            Quản lý các thể loại sách trong thư viện.
+        </p>
     </div>
-</nav>
 
-<div class="container py-4">
+    <a href="<?= DOMAIN ?>?controller=category&action=add"
+       class="btn btn-primary">
 
-    <!-- Tiêu đề -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+        <i class="bi bi-plus-circle me-1"></i>
+        Thêm thể loại
 
-        <div>
-            <h3 class="fw-bold">Quản lý thể loại sách</h3>
+    </a>
 
-            <p class="text-secondary mb-0">
-                Thêm, chỉnh sửa và quản lý các thể loại sách.
-            </p>
-        </div>
+</div>
 
-        <a href="<?= e(DOMAIN) ?>?controller=category&action=add"
-           class="btn btn-primary">
 
-            <i class="bi bi-plus-circle me-1"></i>
-            Thêm thể loại
+<!-- Thông báo thành công -->
+<?php if (isset($_SESSION['success'])): ?>
 
-        </a>
+    <div class="alert alert-success alert-dismissible fade show">
+
+        <?= e($_SESSION['success']) ?>
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
 
     </div>
 
-    <!-- Thông báo -->
-    <?php if ($success !== ''): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <?= e($success) ?>
+    <?php unset($_SESSION['success']); ?>
 
-            <button type="button" class="btn-close"
-                    data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
+<?php endif; ?>
 
-    <?php if ($error !== ''): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-            <?= e($error) ?>
 
-            <button type="button" class="btn-close"
-                    data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
+<!-- Thông báo lỗi -->
+<?php if (isset($_SESSION['error'])): ?>
 
-    <!-- Danh sách thể loại -->
-    <div class="card border-0 shadow-sm">
+    <div class="alert alert-danger alert-dismissible fade show">
 
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-tags me-2"></i>
+        <?= e($_SESSION['error']) ?>
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+
+    </div>
+
+    <?php unset($_SESSION['error']); ?>
+
+<?php endif; ?>
+
+
+<?php
+// Ensure $categories is defined as an empty array if not already set
+$categories = $categories ?? [];
+?>
+
+<!-- Bảng danh sách thể loại -->
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-tags text-primary me-2"></i>
                 Danh sách thể loại
             </h5>
+
+            <span class="text-secondary">
+                Tổng số: <?= count($categories) ?> thể loại
+            </span>
+
         </div>
 
-        <div class="card-body p-0">
+        <div class="table-responsive">
 
-            <div class="table-responsive">
+            <table class="table table-hover align-middle">
 
-                <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
 
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-3">Mã thể loại</th>
-                            <th>Tên thể loại</th>
-                            <th>Mô tả</th>
-                            <th>Ngày tạo</th>
-                            <th class="text-center">Thao tác</th>
-                        </tr>
-                    </thead>
+                    <tr>
+                        <th width="80">Mã</th>
+                        <th>Tên thể loại</th>
+                        <th>Mô tả</th>
+                        <th width="180" class="text-center">Thao tác</th>
+                    </tr>
 
-                    <tbody>
+                </thead>
 
-                        <?php if (empty($categories)): ?>
+                <tbody>
+
+                    <?php if (!empty($categories)): ?>
+
+                        <?php foreach ($categories as $category): ?>
 
                             <tr>
-                                <td colspan="5"
-                                    class="text-center py-4 text-secondary">
-                                    Chưa có thể loại nào.
+
+                                <!-- Mã thể loại -->
+                                <td>
+                                    <?= e($category->getId()) ?>
                                 </td>
+
+                                <!-- Tên thể loại -->
+                                <td class="fw-semibold">
+                                    <?= e($category->getName()) ?>
+                                </td>
+
+                                <!-- Mô tả -->
+                                <td>
+                                    <?= e($category->getDescription() ?? '') ?>
+                                </td>
+
+                                <!-- Các nút thao tác -->
+                                <td class="text-center">
+
+                                    <!-- Nút sửa -->
+                                    <a href="<?= DOMAIN ?>?controller=category&action=edit&id=<?= e($category->getId()) ?>"
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="Sửa">
+
+                                        <i class="bi bi-pencil-square"></i>
+
+                                    </a>
+
+                                    <!-- Nút xóa -->
+                                    <a href="<?= DOMAIN ?>?controller=category&action=delete&id=<?= e($category->getId()) ?>"
+                                       class="btn btn-sm btn-outline-danger"
+                                       title="Xóa">
+
+                                        <i class="bi bi-trash"></i>
+
+                                    </a>
+
+                                </td>
+
                             </tr>
 
-                        <?php else: ?>
+                        <?php endforeach; ?>
 
-                            <?php foreach ($categories as $category): ?>
+                    <?php else: ?>
 
-                                <tr>
+                        <tr>
 
-                                    <td class="ps-3">
-                                        <?= (int)$category->getId() ?>
-                                    </td>
+                            <td colspan="4" class="text-center py-4 text-secondary">
 
-                                    <td>
-                                        <strong>
-                                            <?= e($category->getName()) ?>
-                                        </strong>
-                                    </td>
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
 
-                                    <td>
-                                        <?= e($category->getDescription()) ?>
-                                    </td>
+                                Chưa có thể loại sách nào.
 
-                                    <td>
-                                        <?= e($category->getCreatedAt()) ?>
-                                    </td>
+                            </td>
 
-                                    <td class="text-center text-nowrap">
+                        </tr>
 
-                                        <a href="<?= e(DOMAIN) ?>?controller=category&action=edit&id=<?= (int)$category->getId() ?>"
-                                           class="btn btn-sm btn-outline-primary">
+                    <?php endif; ?>
 
-                                            <i class="bi bi-pencil-square"></i>
-                                        </a>
+                </tbody>
 
-                                        <a href="<?= e(DOMAIN) ?>?controller=category&action=delete&id=<?= (int)$category->getId() ?>"
-                                           class="btn btn-sm btn-outline-danger">
+            </table>
 
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-
-                                    </td>
-
-                                </tr>
-
-                            <?php endforeach; ?>
-
-                        <?php endif; ?>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-        <div class="card-footer bg-white text-secondary">
-            Tổng số thể loại: <?= count($categories) ?>
         </div>
 
     </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-</body>
-</html>
+<?php
+
+// Nạp giao diện cuối trang
+include APP_ROOT . '/app/views/layouts/footer.php';
+
+?>

@@ -1,155 +1,212 @@
 
 <?php
-function e($value)
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 
-$error = $_SESSION['error'] ?? '';
-unset($_SESSION['error']);
+/** @var Category[] $categories */
+// Tiêu đề trang
+$pageTitle = 'Thêm sách';
 
-// Ensure $categories is defined and populated
-$categories = $categories ?? [];
+// Đánh dấu menu đang được chọn
+$activeMenu = 'book';
+
+// Nạp giao diện đầu trang
+include APP_ROOT . '/app/views/layouts/header.php';
+
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Tiêu đề trang -->
+<div class="mb-4">
 
-    <title>Thêm sách mới</title>
+    <h2 class="fw-bold mb-2">Thêm sách mới</h2>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-          rel="stylesheet">
-</head>
-
-<body class="bg-light">
-
-<nav class="navbar navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="<?= e(DOMAIN) ?>">
-            <i class="bi bi-book-half me-2"></i>QUẢN LÝ SÁCH THƯ VIỆN
-        </a>
-    </div>
-</nav>
-
-<div class="container py-4">
-
-    <a href="<?= e(DOMAIN) ?>" class="text-decoration-none">
-        <i class="bi bi-arrow-left"></i> Quay lại danh sách
-    </a>
-
-    <h3 class="fw-bold mt-3">Thêm sách mới</h3>
-
-    <p class="text-secondary">
-        Nhập thông tin sách cần lưu vào kho.
+    <p class="text-secondary mb-0">
+        Nhập thông tin sách để thêm vào kho thư viện.
     </p>
 
-    <?php if ($error !== ''): ?>
-        <div class="alert alert-danger">
-            <?= e($error) ?>
-        </div>
-    <?php endif; ?>
+</div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
 
-            <form method="POST"
-                  action="<?= e(DOMAIN) ?>?controller=book&action=store">
+<!-- Form thêm sách -->
+<div class="card border-0 shadow-sm">
 
-                <div class="row g-3">
+    <div class="card-body p-4">
 
-                    <div class="col-md-6">
-                        <label class="form-label">
-                            Tên sách <span class="text-danger">*</span>
-                        </label>
+        <h5 class="fw-bold mb-4">
+            <i class="bi bi-book text-primary me-2"></i>
+            Thông tin sách
+        </h5>
 
-                        <input type="text" name="title"
-                               class="form-control"
-                               maxlength="200" required>
-                    </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">
-                            Tác giả <span class="text-danger">*</span>
-                        </label>
+        <!-- Hiển thị thông báo lỗi -->
+        <?php if (isset($_SESSION['error'])): ?>
 
-                        <input type="text" name="author"
-                               class="form-control"
-                               maxlength="150" required>
-                    </div>
+            <div class="alert alert-danger alert-dismissible fade show">
 
-                    <div class="col-md-6">
-                        <label class="form-label">Thể loại</label>
+                <?= e($_SESSION['error']) ?>
 
-                        <select name="category_id" class="form-select">
-                            <option value="">-- Chưa phân loại --</option>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
 
-                            <?php foreach ($categories as $category): ?>
-                                <option value="<?= (int) $category->getId() ?>">
-                                    <?= e($category->getName()) ?>
-                                </option>
-                            <?php endforeach; ?>
+            </div>
 
-                        </select>
-                    </div>
+            <?php unset($_SESSION['error']); ?>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Giá sách (VNĐ)</label>
+        <?php endif; ?>
 
-                        <input type="number" name="price"
-                               class="form-control"
-                               min="0" max="999999999999"
-                               step="1" value="0">
-                    </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">
-                            Số lượng trong kho
-                        </label>
+        <form action="<?= DOMAIN ?>?controller=book&action=store"
+              method="POST">
 
-                        <input type="number" name="quantity"
-                               class="form-control"
-                               min="0" step="1" value="0" required>
-                    </div>
+            <div class="row">
 
-                    <div class="col-12">
-                        <label class="form-label">Mô tả sách</label>
+                <!-- Tên sách -->
+                <div class="col-md-6 mb-3">
 
-                        <textarea name="description"
-                                  class="form-control"
-                                  rows="4"
-                                  placeholder="Nhập nội dung mô tả sách..."></textarea>
-                    </div>
+                    <label for="title" class="form-label fw-semibold">
+                        Tên sách <span class="text-danger">*</span>
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           id="title"
+                           name="title"
+                           maxlength="200"
+                           placeholder="Nhập tên sách"
+                           required>
 
                 </div>
 
-                <hr class="my-4">
 
-                <div class="d-flex justify-content-end gap-2">
+                <!-- Tác giả -->
+                <div class="col-md-6 mb-3">
 
-                    <a href="<?= e(DOMAIN) ?>"
-                       class="btn btn-outline-secondary">
-                        Hủy
-                    </a>
+                    <label for="author" class="form-label fw-semibold">
+                        Tác giả <span class="text-danger">*</span>
+                    </label>
 
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-1"></i>
-                        Lưu sách
-                    </button>
+                    <input type="text"
+                           class="form-control"
+                           id="author"
+                           name="author"
+                           maxlength="150"
+                           placeholder="Nhập tên tác giả"
+                           required>
 
                 </div>
 
-            </form>
 
-        </div>
+                <!-- Thể loại -->
+                <div class="col-md-6 mb-3">
+
+                    <label for="category_id" class="form-label fw-semibold">
+                        Thể loại <span class="text-danger">*</span>
+                    </label>
+
+                    <select class="form-select"
+                            id="category_id"
+                            name="category_id"
+                            required>
+
+                        <option value="">-- Chọn thể loại --</option>
+
+                        <?php foreach ($categories as $category): ?>
+
+                            <option value="<?= e($category->getId()) ?>">
+                                <?= e($category->getName()) ?>
+                            </option>
+
+                        <?php endforeach; ?>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Giá sách -->
+                <div class="col-md-6 mb-3">
+
+                    <label for="price" class="form-label fw-semibold">
+                        Giá sách (VNĐ)
+                    </label>
+
+                    <input type="number"
+                           class="form-control"
+                           id="price"
+                           name="price"
+                           min="0"
+                           value="0"
+                           placeholder="Nhập giá sách">
+
+                </div>
+
+
+                <!-- Số lượng -->
+                <div class="col-md-6 mb-3">
+
+                    <label for="quantity" class="form-label fw-semibold">
+                        Số lượng <span class="text-danger">*</span>
+                    </label>
+
+                    <input type="number"
+                           class="form-control"
+                           id="quantity"
+                           name="quantity"
+                           min="0"
+                           value="0"
+                           required>
+
+                </div>
+
+
+                <!-- Mô tả -->
+                <div class="col-12 mb-4">
+
+                    <label for="description" class="form-label fw-semibold">
+                        Mô tả sách
+                    </label>
+
+                    <textarea class="form-control"
+                              id="description"
+                              name="description"
+                              rows="4"
+                              placeholder="Nhập mô tả về nội dung sách..."></textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- Nút thao tác -->
+            <div class="d-flex gap-2">
+
+                <button type="submit" class="btn btn-primary">
+
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Thêm sách
+
+                </button>
+
+                <a href="<?= DOMAIN ?>?controller=book"
+                   class="btn btn-outline-secondary">
+
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Quay lại
+
+                </a>
+
+            </div>
+
+        </form>
+
     </div>
 
 </div>
 
-</body>
-</html>
+
+<?php
+
+// Nạp giao diện cuối trang
+include APP_ROOT . '/app/views/layouts/footer.php';
+
+?>

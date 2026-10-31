@@ -1,3 +1,4 @@
+
 <?php
 
 require_once APP_ROOT . '/app/services/BookService.php';
@@ -5,6 +6,37 @@ require_once APP_ROOT . '/app/services/CategoryService.php';
 
 class BookController
 {
+    // Hiển thị danh sách sách
+    public function index()
+    {
+        // Nhận từ khóa tìm kiếm
+        $keyword = trim($_GET['keyword'] ?? '');
+
+        // Nhận mã thể loại
+        $categoryId = $_GET['category_id'] ?? '';
+
+        // Khởi tạo Service
+        $bookService = new BookService();
+        $categoryService = new CategoryService();
+
+        // Lấy danh sách sách theo từ khóa và thể loại
+        $books = $bookService->getAllBooks(
+            $keyword,
+            $categoryId
+        );
+
+        // Lấy danh sách thể loại để hiển thị bộ lọc
+        $categories = $categoryService->getAllCategories();
+
+        // Lấy thông tin thống kê
+        $totalBooks = $bookService->countBooks();
+        $totalQuantity = $bookService->countTotalQuantity();
+        $outOfStock = $bookService->countOutOfStock();
+
+        // Hiển thị giao diện quản lý sách
+        include APP_ROOT . '/app/views/book/index.php';
+    }
+
     // Hiển thị form thêm sách
     public function add()
     {
@@ -18,7 +50,7 @@ class BookController
     public function store()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . DOMAIN);
+            header('Location: ' . DOMAIN . '?controller=book');
             exit;
         }
 
@@ -73,11 +105,14 @@ class BookController
             $bookService->addBook($book);
 
             $_SESSION['success'] = 'Thêm sách thành công.';
-            header('Location: ' . DOMAIN);
+
+            // Chuyển về trang quản lý sách
+            header('Location: ' . DOMAIN . '?controller=book');
             exit;
 
         } catch (PDOException $e) {
             $_SESSION['error'] = 'Không thể thêm sách: ' . $e->getMessage();
+
             header('Location: ' . DOMAIN . '?controller=book&action=add');
             exit;
         }
@@ -93,7 +128,7 @@ class BookController
 
         if (!$book) {
             $_SESSION['error'] = 'Không tìm thấy sách.';
-            header('Location: ' . DOMAIN);
+            header('Location: ' . DOMAIN . '?controller=book');
             exit;
         }
 
@@ -106,7 +141,7 @@ class BookController
     public function update($id)
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . DOMAIN);
+            header('Location: ' . DOMAIN . '?controller=book');
             exit;
         }
 
@@ -127,6 +162,7 @@ class BookController
             (float) $price > 999999999999
         ) {
             $_SESSION['error'] = 'Vui lòng kiểm tra lại thông tin sách.';
+
             header('Location: ' . DOMAIN . '?controller=book&action=edit&id=' . (int) $id);
             exit;
         }
@@ -140,6 +176,7 @@ class BookController
                 !$categoryService->getCategoryById((int) $categoryId)
             ) {
                 $_SESSION['error'] = 'Thể loại không hợp lệ.';
+
                 header('Location: ' . DOMAIN . '?controller=book&action=edit&id=' . (int) $id);
                 exit;
             }
@@ -149,10 +186,12 @@ class BookController
 
         if (!$bookService->getBookById($id)) {
             $_SESSION['error'] = 'Không tìm thấy sách cần sửa.';
-            header('Location: ' . DOMAIN);
+
+            header('Location: ' . DOMAIN . '?controller=book');
             exit;
         }
 
+        // Tạo đối tượng sách với thông tin mới
         $book = new Book(
             (int) $id,
             $title,
@@ -167,11 +206,14 @@ class BookController
             $bookService->updateBook($book);
 
             $_SESSION['success'] = 'Cập nhật sách thành công.';
-            header('Location: ' . DOMAIN);
+
+            // Chuyển về trang quản lý sách
+            header('Location: ' . DOMAIN . '?controller=book');
             exit;
 
         } catch (PDOException $e) {
             $_SESSION['error'] = 'Không thể cập nhật sách: ' . $e->getMessage();
+
             header('Location: ' . DOMAIN . '?controller=book&action=edit&id=' . (int) $id);
             exit;
         }
@@ -185,7 +227,8 @@ class BookController
 
         if (!$book) {
             $_SESSION['error'] = 'Không tìm thấy sách cần xóa.';
-            header('Location: ' . DOMAIN);
+
+            header('Location: ' . DOMAIN . '?controller=book');
             exit;
         }
 
@@ -196,7 +239,7 @@ class BookController
     public function destroy($id)
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . DOMAIN);
+            header('Location: ' . DOMAIN . '?controller=book');
             exit;
         }
 
@@ -204,7 +247,8 @@ class BookController
 
         if (!$bookService->getBookById($id)) {
             $_SESSION['error'] = 'Không tìm thấy sách cần xóa.';
-            header('Location: ' . DOMAIN);
+
+            header('Location: ' . DOMAIN . '?controller=book');
             exit;
         }
 
@@ -217,7 +261,8 @@ class BookController
             $_SESSION['error'] = 'Không thể xóa sách: ' . $e->getMessage();
         }
 
-        header('Location: ' . DOMAIN);
+        // Quay lại trang quản lý sách
+        header('Location: ' . DOMAIN . '?controller=book');
         exit;
     }
 }

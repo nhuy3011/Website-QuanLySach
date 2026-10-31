@@ -1,121 +1,133 @@
 
 <?php
-function e($value)
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
+/** @var Book $book */
+/** @var Category[] $categories */
+// Tiêu đề trang
+$pageTitle = 'Xóa sách';
 
-// Ensure $book is defined before using it
-if (!isset($book)) {
-    die('Error: Book data is not available.');
-}
+// Đánh dấu menu đang được chọn
+$activeMenu = 'book';
+
+// Nạp giao diện đầu trang
+include APP_ROOT . '/app/views/layouts/header.php';
+
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Tiêu đề trang -->
+<div class="mb-4">
 
-    <title>Xác nhận xóa sách</title>
+    <h2 class="fw-bold mb-2">Xóa sách</h2>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    <p class="text-secondary mb-0">
+        Kiểm tra thông tin sách trước khi thực hiện xóa.
+    </p>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-          rel="stylesheet">
-</head>
+</div>
 
-<body class="bg-light">
 
-<nav class="navbar navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="<?= e(DOMAIN) ?>">
-            <i class="bi bi-book-half me-2"></i>QUẢN LÝ SÁCH THƯ VIỆN
-        </a>
-    </div>
-</nav>
+<!-- Thông tin xác nhận xóa -->
+<div class="card border-0 shadow-sm">
 
-<div class="container py-5">
+    <div class="card-body p-4">
 
-    <div class="card border-0 shadow-sm mx-auto"
-         style="max-width: 650px;">
+        <div class="text-center mb-4">
 
-        <div class="card-body p-4 p-md-5">
+            <i class="bi bi-exclamation-triangle text-danger"
+               style="font-size: 55px;">
+            </i>
 
-            <div class="text-center mb-4">
+            <h5 class="fw-bold mt-3">
+                Bạn có chắc chắn muốn xóa sách này?
+            </h5>
 
-                <i class="bi bi-exclamation-triangle text-danger"
-                   style="font-size: 3rem;"></i>
-
-                <h3 class="fw-bold mt-3">Xác nhận xóa sách</h3>
-
-                <p class="text-secondary">
-                    Bạn có chắc chắn muốn xóa sách này khỏi kho không?
-                </p>
-
-            </div>
-
-            <div class="bg-light rounded p-3 mb-4">
-
-                <p>
-                    <strong>Mã sách:</strong>
-                    <?= (int) $book->getId() ?>
-                </p>
-
-                <p>
-                    <strong>Tên sách:</strong>
-                    <?= e($book->getTitle()) ?>
-                </p>
-
-                <p>
-                    <strong>Tác giả:</strong>
-                    <?= e($book->getAuthor()) ?>
-                </p>
-
-                <p>
-                    <strong>Giá sách:</strong>
-                    <?= number_format((float) $book->getPrice(), 0, ',', '.') ?> đ
-                </p>
-
-                <p class="mb-0">
-                    <strong>Số lượng:</strong>
-                    <?= (int) $book->getQuantity() ?>
-                </p>
-
-            </div>
-
-            <div class="alert alert-warning">
-                Sau khi xác nhận, thông tin sách sẽ bị xóa khỏi database.
-                Thao tác này không thể tự động hoàn tác.
-            </div>
-
-            <form method="POST"
-                  action="<?= e(DOMAIN) ?>?controller=book&action=destroy&id=<?= (int) $book->getId() ?>">
-
-                <div class="d-flex justify-content-center gap-2">
-
-                    <a href="<?= e(DOMAIN) ?>"
-                       class="btn btn-outline-secondary">
-                        Hủy
-                    </a>
-
-                    <button type="submit" class="btn btn-danger"
-                            onclick="return confirm('Bạn chắc chắn muốn xóa sách này?')">
-
-                        <i class="bi bi-trash me-1"></i>
-                        Xác nhận xóa
-
-                    </button>
-
-                </div>
-
-            </form>
+            <p class="text-secondary">
+                Thao tác này sẽ không thể hoàn tác.
+            </p>
 
         </div>
+
+
+        <!-- Bảng thông tin sách -->
+        <div class="table-responsive">
+
+            <table class="table table-bordered">
+
+                <tr>
+                    <th width="180">Mã sách</th>
+                    <td><?= e($book->getId()) ?></td>
+                </tr>
+
+                <tr>
+                    <th>Tên sách</th>
+                    <td class="fw-semibold"><?= e($book->getTitle()) ?></td>
+                </tr>
+
+                <tr>
+                    <th>Tác giả</th>
+                    <td><?= e($book->getAuthor()) ?></td>
+                </tr>
+
+                <tr>
+                    <th>Thể loại</th>
+                    <td><?= e($book->getTitle()) ?></td>
+                </tr>
+
+                <tr>
+                    <th>Giá sách</th>
+                    <td><?= number_format((float)$book->getPrice(), 0, ',', '.') ?> VNĐ</td>
+                </tr>
+
+                <tr>
+                    <th>Số lượng</th>
+                    <td><?= e($book->getQuantity()) ?></td>
+                </tr>
+
+            </table>
+
+        </div>
+
+
+        <!-- Form xác nhận xóa -->
+        <form action="<?= DOMAIN ?>?controller=book&action=destroy&id=<?= e($book->getId()) ?>"
+              method="POST">
+
+            <div class="alert alert-danger">
+
+                <i class="bi bi-exclamation-circle me-2"></i>
+
+                Bạn đang chuẩn bị xóa sách khỏi hệ thống.
+
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+
+                <a href="<?= DOMAIN ?>?controller=book"
+                   class="btn btn-outline-secondary">
+
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Hủy
+
+                </a>
+
+                <button type="submit" class="btn btn-danger">
+
+                    <i class="bi bi-trash me-1"></i>
+                    Xác nhận xóa
+
+                </button>
+
+            </div>
+
+        </form>
+
     </div>
 
 </div>
 
-</body>
-</html>
+
+<?php
+
+// Nạp giao diện cuối trang
+include APP_ROOT . '/app/views/layouts/footer.php';
+
+?>

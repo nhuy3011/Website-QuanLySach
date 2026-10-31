@@ -1,103 +1,130 @@
 
 <?php
-function e($value)
-{
-    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 
-$error = $_SESSION['error'] ?? '';
-unset($_SESSION['error']);
+// Tiêu đề trang
+$pageTitle = 'Thêm thể loại';
+
+// Đánh dấu menu đang được chọn
+$activeMenu = 'category';
+
+// Nạp giao diện đầu trang
+include APP_ROOT . '/app/views/layouts/header.php';
+
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
+<!-- Tiêu đề trang -->
+<div class="mb-4">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Thêm thể loại</title>
+    <h2 class="fw-bold mb-2">Thêm thể loại sách</h2>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-</head>
+    <p class="text-secondary mb-0">
+        Nhập thông tin để thêm thể loại mới vào hệ thống.
+    </p>
 
-<body class="bg-light">
+</div>
 
-<nav class="navbar navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="<?= e(DOMAIN) ?>">
-            QUẢN LÝ SÁCH THƯ VIỆN
-        </a>
-    </div>
-</nav>
 
-<div class="container py-4">
+<!-- Form thêm thể loại -->
+<div class="card border-0 shadow-sm">
 
-    <a href="<?= e(DOMAIN) ?>?controller=category"
-       class="text-decoration-none">
-        <i class="bi bi-arrow-left"></i> Quay lại danh sách
-    </a>
+    <div class="card-body p-4">
 
-    <h3 class="fw-bold mt-3">Thêm thể loại mới</h3>
+        <h5 class="fw-bold mb-4">
+            <i class="bi bi-tags text-primary me-2"></i>
+            Thông tin thể loại
+        </h5>
 
-    <?php if ($error !== ''): ?>
-        <div class="alert alert-danger">
-            <?= e($error) ?>
-        </div>
-    <?php endif; ?>
+        <!-- Hiển thị thông báo lỗi -->
+        <?php if (isset($_SESSION['error'])): ?>
 
-    <div class="card border-0 shadow-sm mt-3">
-        <div class="card-body p-4">
+            <div class="alert alert-danger alert-dismissible fade show">
 
-            <form method="POST"
-                  action="<?= e(DOMAIN) ?>?controller=category&action=store">
+                <?= e($_SESSION['error']) ?>
 
-                <div class="mb-3">
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
 
-                    <label class="form-label">
-                        Tên thể loại <span class="text-danger">*</span>
-                    </label>
+            </div>
 
-                    <input type="text"
-                           name="name"
-                           class="form-control"
-                           maxlength="100"
-                           placeholder="Nhập tên thể loại..."
-                           required>
+            <?php unset($_SESSION['error']); ?>
 
+        <?php endif; ?>
+
+
+        <form action="<?= DOMAIN ?>?controller=category&action=store"
+              method="POST">
+
+            <!-- Tên thể loại -->
+            <div class="mb-3">
+
+                <label for="name" class="form-label fw-semibold">
+                    Tên thể loại <span class="text-danger">*</span>
+                </label>
+
+                <input type="text"
+                       class="form-control"
+                       id="name"
+                       name="name"
+                       maxlength="100"
+                       placeholder="Ví dụ: Văn học, Khoa học, Lịch sử..."
+                       required>
+
+                <div class="form-text">
+                    Tên thể loại không được để trống và tối đa 100 ký tự.
                 </div>
 
-                <div class="mb-3">
+            </div>
 
-                    <label class="form-label">Mô tả</label>
 
-                    <textarea name="description"
-                              class="form-control"
-                              rows="4"
-                              maxlength="255"
-                              placeholder="Nhập mô tả thể loại..."></textarea>
+            <!-- Mô tả -->
+            <div class="mb-4">
 
-                </div>
+                <label for="description" class="form-label fw-semibold">
+                    Mô tả
+                </label>
 
-                <div class="d-flex justify-content-end gap-2">
+                <textarea class="form-control"
+                          id="description"
+                          name="description"
+                          rows="4"
+                          maxlength="255"
+                          placeholder="Nhập mô tả về thể loại sách..."></textarea>
 
-                    <a href="<?= e(DOMAIN) ?>?controller=category"
-                       class="btn btn-secondary">
-                        Hủy
-                    </a>
+            </div>
 
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-1"></i>
-                        Lưu thể loại
-                    </button>
 
-                </div>
+            <!-- Nút thao tác -->
+            <div class="d-flex gap-2">
 
-            </form>
+                <button type="submit" class="btn btn-primary">
 
-        </div>
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Thêm thể loại
+
+                </button>
+
+                <a href="<?= DOMAIN ?>?controller=category"
+                   class="btn btn-outline-secondary">
+
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Quay lại
+
+                </a>
+
+            </div>
+
+        </form>
+
     </div>
 
 </div>
 
-</body>
-</html>
+
+<?php
+
+// Nạp giao diện cuối trang
+include APP_ROOT . '/app/views/layouts/footer.php';
+
+?>
